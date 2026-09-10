@@ -1,27 +1,74 @@
 'use client'
 
-import { useState } from 'react'
+import dynamic from 'next/dynamic'
+import { useState, type ComponentType } from 'react'
 import { AuthView } from '@/components/app/auth-view'
 import { LandingPage } from '@/components/app/landing'
-import { AppShell, COACH_NAV, ATHLETE_NAV } from '@/components/app/shell'
-import { CoachDashboard } from '@/components/app/coach/dashboard'
-import { AthletesView } from '@/components/app/coach/athletes'
-import { ExercisesView } from '@/components/app/coach/exercises'
-import { ProgramsView } from '@/components/app/coach/programs'
-import { CoachCalendar } from '@/components/app/coach/calendar'
-import { FinanceView } from '@/components/app/coach/finance'
-import { ReportsView } from '@/components/app/coach/reports'
-import { AthleteDashboard } from '@/components/app/athlete/dashboard'
-import { AthletePrograms } from '@/components/app/athlete/programs'
-import { AthleteLogForm } from '@/components/app/athlete/log'
-import { AthleteProgress } from '@/components/app/athlete/progress'
-import { AthleteHistory } from '@/components/app/athlete/history'
-import { MessagesView } from '@/components/app/shared/messages'
 import { api, useFetch, AuthUser } from '@/lib/client'
-import { Loader2 } from 'lucide-react'
+import {
+  Loader2,
+  LayoutDashboard, Users, ClipboardList, Dumbbell, CalendarDays,
+  MessageCircle, Wallet, BarChart3,
+} from 'lucide-react'
+
+interface NavItem {
+  key: string
+  label: string
+  icon: ComponentType<{ className?: string }>
+  badge?: number
+}
+
+const COACH_NAV: NavItem[] = [
+  { key: 'dashboard', label: 'داشبورد', icon: LayoutDashboard },
+  { key: 'athletes', label: 'ورزشکاران', icon: Users },
+  { key: 'programs', label: 'برنامه‌های تمرینی', icon: ClipboardList },
+  { key: 'exercises', label: 'بانک حرکات', icon: Dumbbell },
+  { key: 'calendar', label: 'تقویم', icon: CalendarDays },
+  { key: 'messages', label: 'پیام‌ها', icon: MessageCircle },
+  { key: 'finance', label: 'مالی', icon: Wallet },
+  { key: 'reports', label: 'گزارش‌ها', icon: BarChart3 },
+]
+
+const ATHLETE_NAV: NavItem[] = [
+  { key: 'dashboard', label: 'خانه', icon: LayoutDashboard },
+  { key: 'programs', label: 'برنامه من', icon: ClipboardList },
+  { key: 'progress', label: 'پیشرفت', icon: BarChart3 },
+  { key: 'history', label: 'سوابق', icon: Users },
+  { key: 'messages', label: 'پیام‌ها', icon: MessageCircle },
+]
+
+/* ---------- code splitting ----------
+ * ویوهای پنل همه به‌صورت تنبل بارگذاری می‌شوند؛
+ * بازدیدکننده‌ی لندینگ فقط کد لندینگ را دانلود می‌کند و
+ * هر ویو فقط در لحظه‌ی استفاده fetch/compile می‌شود.
+ * recharts و بقیه‌ی وابستگی‌های سنگین دیگر در باندل اولیه نیستند.
+ * ------------------------------------------------ */
+
+function ViewLoader() {
+  return (
+    <div className="min-h-[60vh] flex items-center justify-center">
+      <Loader2 className="w-8 h-8 text-primary animate-spin" />
+    </div>
+  )
+}
+
+const AppShell = dynamic(() => import('@/components/app/shell').then((m) => m.AppShell), { loading: ViewLoader })
+const CoachDashboard = dynamic(() => import('@/components/app/coach/dashboard').then((m) => m.CoachDashboard), { loading: ViewLoader })
+const AthletesView = dynamic(() => import('@/components/app/coach/athletes').then((m) => m.AthletesView), { loading: ViewLoader })
+const ExercisesView = dynamic(() => import('@/components/app/coach/exercises').then((m) => m.ExercisesView), { loading: ViewLoader })
+const ProgramsView = dynamic(() => import('@/components/app/coach/programs').then((m) => m.ProgramsView), { loading: ViewLoader })
+const CoachCalendar = dynamic(() => import('@/components/app/coach/calendar').then((m) => m.CoachCalendar), { loading: ViewLoader })
+const FinanceView = dynamic(() => import('@/components/app/coach/finance').then((m) => m.FinanceView), { loading: ViewLoader })
+const ReportsView = dynamic(() => import('@/components/app/coach/reports').then((m) => m.ReportsView), { loading: ViewLoader })
+const AthleteDashboard = dynamic(() => import('@/components/app/athlete/dashboard').then((m) => m.AthleteDashboard), { loading: ViewLoader })
+const AthletePrograms = dynamic(() => import('@/components/app/athlete/programs').then((m) => m.AthletePrograms), { loading: ViewLoader })
+const AthleteLogForm = dynamic(() => import('@/components/app/athlete/log').then((m) => m.AthleteLogForm), { loading: ViewLoader })
+const AthleteProgress = dynamic(() => import('@/components/app/athlete/progress').then((m) => m.AthleteProgress), { loading: ViewLoader })
+const AthleteHistory = dynamic(() => import('@/components/app/athlete/history').then((m) => m.AthleteHistory), { loading: ViewLoader })
+const MessagesView = dynamic(() => import('@/components/app/shared/messages').then((m) => m.MessagesView), { loading: ViewLoader })
 
 export default function Home() {
-  const { data, loading } = useFetch<{ user: AuthUser | null }>('/api/auth/me')
+  const { data } = useFetch<{ user: AuthUser | null }>('/api/auth/me')
   const [view, setView] = useState('dashboard')
   const [screen, setScreen] = useState<'landing' | 'auth'>('landing')
   const [logSessionId, setLogSessionId] = useState<string | undefined>(undefined)
@@ -32,20 +79,12 @@ export default function Home() {
     window.location.reload()
   }
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center">
-            <Loader2 className="w-6 h-6 text-white animate-spin" />
-          </div>
-          <p className="text-sm text-muted-foreground">در حال بارگذاری فیت‌کوچ...</p>
-        </div>
-      </div>
-    )
-  }
+  const user = data?.user ?? null
 
-  if (!data?.user) {
+  /* لندینگ بلافاصله رندر می‌شود و منتظر پاسخ /api/auth/me نمی‌ماند؛
+   * سشن در پس‌زمینه بررسی می‌شود و اگر کاربر وارد شده باشد،
+   * پنل او جایگزین می‌شود. */
+  if (!user) {
     return screen === 'landing' ? (
       <LandingPage onEnter={() => setScreen('auth')} />
     ) : (
@@ -53,7 +92,6 @@ export default function Home() {
     )
   }
 
-  const user = data.user
   const isCoach = user.role === 'COACH'
 
   const navItems = (isCoach ? COACH_NAV : ATHLETE_NAV).map((n) =>

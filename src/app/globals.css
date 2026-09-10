@@ -141,3 +141,42 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* ---------- perf: GPU-accelerated infinite animations ----------
+ * انیمیشن‌های بی‌پایان با CSS خالص به‌جای framer-motion اجرا می‌شوند؛
+ * روی کامپوزیتور GPU می‌روند و main-thread آزاد می‌ماند (بدون لگ) */
+
+@keyframes fc-scroll-hint {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(8px); }
+}
+.fc-scroll-hint {
+  animation: fc-scroll-hint 1.8s ease-in-out infinite;
+}
+
+@keyframes fc-ticker-rtl {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(50%, 0, 0); }
+}
+.fc-ticker {
+  animation: fc-ticker-rtl 30s linear infinite;
+  will-change: transform;
+}
+
+@keyframes fc-flame-swing {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(8deg); }
+  75% { transform: rotate(-8deg); }
+}
+.fc-flame {
+  animation: fc-flame-swing 5s ease-in-out infinite;
+}
+
+/* احترام به تنظیمات کاهش حرکت کاربر */
+@media (prefers-reduced-motion: reduce) {
+  .fc-scroll-hint,
+  .fc-ticker,
+  .fc-flame {
+    animation: none;
+  }
+}

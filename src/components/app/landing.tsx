@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import Image from 'next/image'
 import { motion, useInView, animate } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import {
@@ -192,14 +193,21 @@ export function LandingPage({ onEnter }: { onEnter: () => void }) {
       <section className="relative min-h-screen flex items-center">
         {/* bg image with cinematic overlays */}
         <div className="absolute inset-0">
-          <motion.img
-            src={IMG.hero}
-            alt="ورزشکار در حال تمرین در باشگاه"
+          <motion.div
             initial={{ scale: 1.15, opacity: 0.4 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 2.2, ease: [0.22, 1, 0.36, 1] }}
-            className="w-full h-full object-cover"
-          />
+            className="absolute inset-0"
+          >
+            <Image
+              src={IMG.hero}
+              alt="ورزشکار در حال تمرین در باشگاه"
+              fill
+              priority
+              sizes="100vw"
+              className="object-cover"
+            />
+          </motion.div>
           <div className="absolute inset-0 bg-gradient-to-l from-[#0C0A09]/95 via-[#0C0A09]/75 to-[#0C0A09]/35" />
           <div className="absolute inset-0 bg-gradient-to-t from-[#0C0A09] via-transparent to-[#0C0A09]/60" />
           <div className="absolute bottom-0 left-1/4 w-[42rem] h-[42rem] rounded-full bg-orange-600/15 blur-[140px] pointer-events-none" />
@@ -278,7 +286,7 @@ export function LandingPage({ onEnter }: { onEnter: () => void }) {
               <div className="flex items-center gap-3">
                 <div className="flex -space-x-3 space-x-reverse">
                   {[IMG.av1, IMG.av2, IMG.av3].map((a, i) => (
-                    <img key={i} src={a} alt="کاربر فیت‌کوچ" className="w-10 h-10 rounded-full border-2 border-[#0C0A09] object-cover" />
+                    <Image key={i} src={a} alt="کاربر فیت‌کوچ" width={40} height={40} className="w-10 h-10 rounded-full border-2 border-[#0C0A09] object-cover" />
                   ))}
                 </div>
                 <div className="text-sm">
@@ -298,25 +306,21 @@ export function LandingPage({ onEnter }: { onEnter: () => void }) {
           </div>
         </div>
 
-        {/* scroll hint */}
-        <motion.div
-          animate={{ y: [0, 8, 0] }}
-          transition={{ duration: 1.8, repeat: Infinity }}
-          className="absolute bottom-6 right-1/2 translate-x-1/2 text-zinc-500 text-xs flex flex-col items-center gap-1.5"
+        {/* scroll hint — CSS anim (GPU) */}
+        <div
+          className="fc-scroll-hint absolute bottom-6 right-1/2 translate-x-1/2 text-zinc-500 text-xs flex flex-col items-center gap-1.5"
         >
           اسکرول کن
           <div className="w-6 h-10 rounded-full border-2 border-zinc-600 flex justify-center pt-2">
             <div className="w-1 h-2 rounded-full bg-orange-400" />
           </div>
-        </motion.div>
+        </div>
       </section>
 
       {/* ================= TICKER ================= */}
       <div className="relative border-y border-orange-500/15 bg-gradient-to-l from-orange-950/40 via-[#0C0A09] to-orange-950/40 py-4 overflow-hidden">
-        <motion.div
-          animate={{ x: ['0%', '50%'] }}
-          transition={{ duration: 30, repeat: Infinity, ease: 'linear' }}
-          className="flex whitespace-nowrap gap-8 w-max"
+        <div
+          className="fc-ticker flex whitespace-nowrap gap-8 w-max"
         >
           {[...TICKER, ...TICKER, ...TICKER, ...TICKER].map((w, i) => (
             <span key={i} className="flex items-center gap-8 text-lg font-black text-zinc-600">
@@ -324,7 +328,7 @@ export function LandingPage({ onEnter }: { onEnter: () => void }) {
               <Dumbbell className="w-4 h-4 text-orange-600/60" />
             </span>
           ))}
-        </motion.div>
+        </div>
       </div>
 
       {/* ================= PROBLEM → SOLUTION ================= */}
@@ -411,10 +415,12 @@ export function LandingPage({ onEnter }: { onEnter: () => void }) {
                 <div className="relative group">
                   <div className={`absolute -inset-4 bg-gradient-to-tr ${idx % 2 === 1 ? 'from-green-500/20' : 'from-orange-500/25'} to-transparent blur-2xl rounded-[2.5rem] opacity-70 group-hover:opacity-100 transition-opacity`} />
                   <div className="relative rounded-3xl overflow-hidden border border-white/10 shadow-2xl shadow-black/50">
-                    <img
+                    <Image
                       src={f.img}
                       alt={f.alt}
-                      loading="lazy"
+                      width={800}
+                      height={600}
+                      sizes="(max-width: 1024px) 100vw, 50vw"
                       className="w-full aspect-[4/3] object-cover group-hover:scale-[1.04] transition-transform duration-700"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-[#0C0A09]/80 via-transparent to-transparent" />
@@ -475,7 +481,7 @@ export function LandingPage({ onEnter }: { onEnter: () => void }) {
         <div className="max-w-6xl mx-auto">
           <Reveal>
             <div className="relative rounded-[2.5rem] overflow-hidden border border-orange-500/20">
-              <img src={IMG.cta} alt="دویدن در غروب" loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
+              <Image src={IMG.cta} alt="دویدن در غروب" fill sizes="100vw" className="object-cover" />
               <div className="absolute inset-0 bg-[#0C0A09]/85" />
               <div className="absolute inset-0 bg-gradient-to-l from-orange-600/25 via-transparent to-transparent" />
               <div className="relative grid grid-cols-2 lg:grid-cols-4 gap-8 p-10 sm:p-14">
@@ -650,7 +656,7 @@ export function LandingPage({ onEnter }: { onEnter: () => void }) {
                   <Stars />
                   <p className="mt-5 text-zinc-300 leading-relaxed text-[15px]">{t.text}</p>
                   <div className="mt-6 pt-5 border-t border-white/8 flex items-center gap-3">
-                    <img src={t.avatar} alt={t.name} loading="lazy" className="w-12 h-12 rounded-full object-cover border-2 border-orange-500/40" />
+                    <Image src={t.avatar} alt={t.name} width={48} height={48} loading="lazy" className="w-12 h-12 rounded-full object-cover border-2 border-orange-500/40" />
                     <div>
                       <div className="font-bold text-white text-sm">{t.name}</div>
                       <div className="text-xs text-zinc-500 mt-0.5">{t.role}</div>
@@ -694,17 +700,15 @@ export function LandingPage({ onEnter }: { onEnter: () => void }) {
         <div className="max-w-5xl mx-auto">
           <Reveal>
             <div className="relative rounded-[2.5rem] overflow-hidden border border-orange-500/30 shadow-2xl shadow-orange-950/30">
-              <img src={IMG.cta} alt="" aria-hidden className="absolute inset-0 w-full h-full object-cover" />
+              <Image src={IMG.cta} alt="" aria-hidden fill sizes="100vw" className="object-cover" />
               <div className="absolute inset-0 bg-gradient-to-b from-[#0C0A09]/70 via-[#0C0A09]/85 to-[#0C0A09]/95" />
               <div className="absolute -top-24 left-1/3 w-96 h-96 rounded-full bg-orange-600/25 blur-[110px]" />
               <div className="relative text-center px-6 py-16 sm:py-20">
-                <motion.div
-                  animate={{ rotate: [0, 8, -8, 0] }}
-                  transition={{ duration: 5, repeat: Infinity }}
-                  className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center shadow-2xl shadow-orange-600/50 mb-7"
+                <div
+                  className="fc-flame w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center shadow-2xl shadow-orange-600/50 mb-7"
                 >
                   <Flame className="w-8 h-8 text-white" />
-                </motion.div>
+                </div>
                 <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white leading-[1.35] max-w-2xl mx-auto">
                   آتیش زیر پات هنوز
                   <span className="text-transparent bg-clip-text bg-gradient-to-l from-orange-500 to-amber-400"> روشنه؟</span>

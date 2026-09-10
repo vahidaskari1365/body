@@ -3,10 +3,11 @@ import { Vazirmatn } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 
+/* فونت variable تک‌فایلی (wght 100-900) به‌جای ۶ فایل وزن جدا — دانلود کمتر، رندر سریع‌تر */
 const vazir = Vazirmatn({
   variable: "--font-vazir",
   subsets: ["arabic", "latin"],
-  weight: ["300", "400", "500", "600", "700", "800"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
