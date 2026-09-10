@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { AuthView } from '@/components/app/auth-view'
+import { LandingPage } from '@/components/app/landing'
 import { AppShell, COACH_NAV, ATHLETE_NAV } from '@/components/app/shell'
 import { CoachDashboard } from '@/components/app/coach/dashboard'
 import { AthletesView } from '@/components/app/coach/athletes'
@@ -22,6 +23,7 @@ import { Loader2 } from 'lucide-react'
 export default function Home() {
   const { data, loading } = useFetch<{ user: AuthUser | null }>('/api/auth/me')
   const [view, setView] = useState('dashboard')
+  const [screen, setScreen] = useState<'landing' | 'auth'>('landing')
   const [logSessionId, setLogSessionId] = useState<string | undefined>(undefined)
   const [logKey, setLogKey] = useState(0)
 
@@ -43,7 +45,13 @@ export default function Home() {
     )
   }
 
-  if (!data?.user) return <AuthView onLogin={() => window.location.reload()} />
+  if (!data?.user) {
+    return screen === 'landing' ? (
+      <LandingPage onEnter={() => setScreen('auth')} />
+    ) : (
+      <AuthView onLogin={() => window.location.reload()} onBack={() => setScreen('landing')} />
+    )
+  }
 
   const user = data.user
   const isCoach = user.role === 'COACH'

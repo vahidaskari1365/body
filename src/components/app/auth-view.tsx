@@ -6,16 +6,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Dumbbell, Loader2, MessageCircle, CalendarDays, TrendingUp, Video } from 'lucide-react'
+import { Dumbbell, Loader2, MessageCircle, CalendarDays, TrendingUp, Video, ArrowRight } from 'lucide-react'
 import { api, AuthUser } from '@/lib/client'
 import { toast } from '@/hooks/use-toast'
 import { LoginForm, RegisterForm } from './auth-forms'
 
 interface Props {
   onLogin: (user: AuthUser) => void
+  onBack?: () => void
 }
 
-export function AuthView({ onLogin }: Props) {
+export function AuthView({ onLogin, onBack }: Props) {
   const [loading, setLoading] = useState<string | null>(null)
 
   async function login(email: string, password: string, tag: string) {
@@ -89,6 +90,12 @@ export function AuthView({ onLogin }: Props) {
       {/* Form side */}
       <div className="flex-1 flex items-center justify-center p-6 lg:p-12 bg-background">
         <div className="w-full max-w-md">
+          {onBack && (
+            <Button variant="ghost" onClick={onBack} className="mb-4 text-muted-foreground hover:text-foreground -mr-2">
+              <ArrowRight className="w-4 h-4 ml-1" />
+              بازگشت به صفحه اصلی
+            </Button>
+          )}
           <Tabs defaultValue="login" dir="rtl">
             <TabsList className="grid w-full grid-cols-2 mb-6">
               <TabsTrigger value="login">ورود</TabsTrigger>

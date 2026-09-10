@@ -23,7 +23,7 @@ server.log
 
 # platform / workspace folders (not part of the app)
 /skills
-/skills-repos
+/skills-repos/
 /download
 /upload
 /worklog.md
