@@ -1,0 +1,197 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String           @id @default(cuid())
+  email        String           @unique
+  name         String
+  password     String
+  role         String           // COACH | ATHLETE
+  phone        String?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  sessions     Session[]
+  athleteProfile AthleteProfile? @relation("AthleteUser")
+  coachAthletes  AthleteProfile[] @relation("CoachAthletes")
+  exercises      Exercise[]
+  programs       Program[]
+  programAssignments ProgramAssignment[]
+  paymentsReceived Payment[]      @relation("PaymentsToAthlete")
+  paymentsGiven    Payment[]      @relation("PaymentsFromCoach")
+  sentMessages     Message[]      @relation("SentMessages")
+  receivedMessages Message[]      @relation("ReceivedMessages")
+  workoutLogs      WorkoutLog[]
+  progressEntries  ProgressEntry[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model AthleteProfile {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  user         User     @relation("AthleteUser", fields: [userId], references: [id], onDelete: Cascade)
+  coachId      String?
+  coach        User?    @relation("CoachAthletes", fields: [coachId], references: [id], onDelete: SetNull)
+  birthDate    String?
+  height       Float?
+  weight       Float?
+  sport        String?
+  goal         String?
+  level        String?  // BEGINNER | INTERMEDIATE | ADVANCED
+  medicalNotes String?
+  status       String   @default("ACTIVE") // ACTIVE | PAUSED | ARCHIVED
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Exercise {
+  id           String   @id @default(cuid())
+  coachId      String
+  coach        User     @relation(fields: [coachId], references: [id], onDelete: Cascade)
+  name         String
+  category     String   // STRENGTH | CARDIO | MOBILITY | CORE | WARMUP | COOLDOWN
+  muscleGroups String?
+  equipment    String?
+  description  String?
+  instructions String?
+  videoUrl     String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  sessionExercises SessionExercise[]
+}
+
+model Program {
+  id            String   @id @default(cuid())
+  coachId       String
+  coach         User     @relation(fields: [coachId], references: [id], onDelete: Cascade)
+  title         String
+  description   String?
+  goal          String?  // MUSCLE_GAIN | FAT_LOSS | FITNESS | ATHLETIC
+  level         String?  // BEGINNER | INTERMEDIATE | ADVANCED
+  durationWeeks Int      @default(4)
+  daysPerWeek   Int      @default(3)
+  status        String   @default("DRAFT") // DRAFT | PUBLISHED | ARCHIVED
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  assignments   ProgramAssignment[]
+  sessions      WorkoutSession[]
+}
+
+model ProgramAssignment {
+  id        String   @id @default(cuid())
+  programId String
+  program   Program  @relation(fields: [programId], references: [id], onDelete: Cascade)
+  athleteId String
+  athlete   User     @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+  startDate String
+  status    String   @default("ACTIVE") // ACTIVE | COMPLETED | CANCELLED
+  createdAt DateTime @default(now())
+}
+
+model WorkoutSession {
+  id          String   @id @default(cuid())
+  programId   String
+  program     Program  @relation(fields: [programId], references: [id], onDelete: Cascade)
+  title       String
+  weekNumber  Int
+  dayNumber   Int
+  dayLabel    String?  // شنبه، یکشنبه...
+  focus       String?  // سینه و بازو، پا...
+  notes       String?
+  scheduledDate String?
+  exercises   SessionExercise[]
+  logs        WorkoutLog[]
+  createdAt   DateTime @default(now())
+}
+
+model SessionExercise {
+  id          String  @id @default(cuid())
+  sessionId   String
+  session     WorkoutSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  exerciseId  String
+  exercise    Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  order       Int     @default(0)
+  sets        Int     @default(3)
+  reps        String  @default("10")
+  weight      String?
+  restSeconds Int     @default(60)
+  notes       String?
+}
+
+model WorkoutLog {
+  id        String   @id @default(cuid())
+  athleteId String
+  athlete   User     @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+  sessionId String?
+  session   WorkoutSession? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+  title     String?
+  date      DateTime @default(now())
+  status    String   @default("COMPLETED") // COMPLETED | PARTIAL | SKIPPED
+  duration  Int?     // minutes
+  rating    Int?     // 1-5
+  notes     String?
+  exerciseLogs ExerciseLog[]
+}
+
+model ExerciseLog {
+  id           String  @id @default(cuid())
+  workoutLogId String
+  workoutLog   WorkoutLog @relation(fields: [workoutLogId], references: [id], onDelete: Cascade)
+  exerciseId   String?
+  exerciseName String
+  actualSets   Int?
+  actualReps   String?
+  actualWeight String?
+  notes        String?
+}
+
+model ProgressEntry {
+  id         String   @id @default(cuid())
+  athleteId  String
+  athlete    User     @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+  date       DateTime @default(now())
+  weight     Float?
+  bodyFat    Float?
+  muscleMass Float?
+  notes      String?
+  createdAt  DateTime @default(now())
+}
+
+model Message {
+  id         String    @id @default(cuid())
+  senderId   String
+  sender     User      @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiverId String
+  receiver   User      @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+  content    String
+  readAt     DateTime?
+  createdAt  DateTime  @default(now())
+}
+
+model Payment {
+  id          String   @id @default(cuid())
+  coachId     String
+  coach       User     @relation("PaymentsFromCoach", fields: [coachId], references: [id], onDelete: Cascade)
+  athleteId   String
+  athlete     User     @relation("PaymentsToAthlete", fields: [athleteId], references: [id], onDelete: Cascade)
+  amount      Float
+  title       String
+  method      String?  // CASH | CARD | ONLINE | TRANSFER
+  status      String   @default("PAID") // PAID | PENDING | CANCELLED
+  date        DateTime @default(now())
+  notes       String?
+  createdAt   DateTime @default(now())
+}

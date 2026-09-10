@@ -1,2 +1,41 @@
-skills/
+# dependencies
 node_modules/
+
+# next.js
+.next/
+out/
+
+# production
+build/
+
+# runtime database (local dev data)
+db/*.db
+db/*.db-journal
+
+# env
+.env
+.env*.local
+
+# logs
+dev.log
+server.log
+*.log
+
+# platform / workspace folders (not part of the app)
+/skills
+/skills-repos
+/download
+/upload
+/worklog.md
+/.zscripts
+/agent-ctx
+
+# misc
+.DS_Store
+*.pem
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.vercel
+*.tsbuildinfo
+next-env.d.ts
